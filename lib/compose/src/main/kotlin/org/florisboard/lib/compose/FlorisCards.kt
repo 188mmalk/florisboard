@@ -80,7 +80,10 @@ fun FlorisSimpleCard(
     Card(
         onClick = onClick ?: { },
         enabled = onClick != null,
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .padding(vertical = 8.dp)
+            .fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
             contentColor = contentColor,
             containerColor = backgroundColor,

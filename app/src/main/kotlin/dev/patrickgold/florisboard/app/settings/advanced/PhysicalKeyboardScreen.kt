@@ -56,6 +56,7 @@ fun PhysicalKeyboardScreen() = FlorisScreen {
             )
         } else {
             Preference(
+                onClick = {},
                 title = stringRes(R.string.physical_keyboard__system_settings__title),
                 summary = stringRes(R.string.physical_keyboard__system_settings__summary_not_attached),
             )

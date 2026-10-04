@@ -220,16 +220,19 @@ fun DevtoolsScreen() = FlorisScreen {
         PreferenceGroup(title = "prefs.internal.version*") {
             val versionOnInstall by prefs.internal.versionOnInstall.collectAsState()
             Preference(
+                onClick = {},
                 title = "prefs.internal.versionOnInstall",
                 summary = versionOnInstall,
             )
             val versionLastUse by prefs.internal.versionLastUse.collectAsState()
             Preference(
+                onClick = {},
                 title = "prefs.internal.versionLastUse",
                 summary = versionLastUse,
             )
             val versionLastChangelog by prefs.internal.versionLastChangelog.collectAsState()
             Preference(
+                onClick = {},
                 title = "prefs.internal.versionLastChangelog",
                 summary = versionLastChangelog,
             )

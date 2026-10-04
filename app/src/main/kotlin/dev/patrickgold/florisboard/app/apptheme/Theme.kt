@@ -70,13 +70,15 @@ fun FlorisAppTheme(
     theme: AppTheme,
     content: @Composable () -> Unit,
 ) {
-    val colors = getColorScheme(theme = theme)
-
     val darkTheme =
         theme == AppTheme.DARK
             || theme == AppTheme.AMOLED_DARK
             || (theme == AppTheme.AUTO && isSystemInDarkTheme())
             || (theme == AppTheme.AUTO_AMOLED && isSystemInDarkTheme())
+
+    val colors = getColorScheme(theme = theme).run {
+        copy(surface = surfaceContainer)
+    }
 
     val view = LocalView.current
     if (!view.isInEditMode) {
