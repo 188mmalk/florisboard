@@ -48,7 +48,6 @@ import dev.patrickgold.florisboard.app.ext.ExtensionImportScreen
 import dev.patrickgold.florisboard.app.ext.ExtensionImportScreenType
 import dev.patrickgold.florisboard.app.ext.ExtensionListScreen
 import dev.patrickgold.florisboard.app.ext.ExtensionListScreenType
-import dev.patrickgold.florisboard.app.ext.ExtensionViewScreen
 import dev.patrickgold.florisboard.app.settings.HomeScreen
 import dev.patrickgold.florisboard.app.settings.about.AboutScreen
 import dev.patrickgold.florisboard.app.settings.about.ProjectLicenseScreen
@@ -72,8 +71,8 @@ import dev.patrickgold.florisboard.app.settings.localization.SelectLocaleScreen
 import dev.patrickgold.florisboard.app.settings.localization.SubtypeEditorScreen
 import dev.patrickgold.florisboard.app.settings.media.MediaScreen
 import dev.patrickgold.florisboard.app.settings.smartbar.SmartbarScreen
-import dev.patrickgold.florisboard.app.settings.theme.ThemeManagerScreen
-import dev.patrickgold.florisboard.app.settings.theme.ThemeManagerScreenAction
+import dev.patrickgold.florisboard.app.settings.theme.ThemeSelectionScreen
+import dev.patrickgold.florisboard.app.settings.theme.ThemeSelectionScreenAction
 import dev.patrickgold.florisboard.app.settings.theme.ThemeScreen
 import dev.patrickgold.florisboard.app.settings.typing.TypingScreen
 import dev.patrickgold.florisboard.app.setup.SetupScreen
@@ -134,8 +133,8 @@ object Routes {
         object Theme
 
         @Serializable
-        @Deeplink("settings/theme/manage")
-        data class ThemeManager(val action: ThemeManagerScreenAction)
+        @Deeplink("settings/theme/selection")
+        data class ThemeSelection(val action: ThemeSelectionScreenAction)
 
         @Serializable
         @Deeplink("settings/keyboard")
@@ -246,10 +245,6 @@ object Routes {
         data class Import(val type: ExtensionImportScreenType, val uuid: String? = null)
 
         @Serializable
-        @Deeplink("ext/view")
-        data class View(val id: String)
-
-        @Serializable
         @Deeplink("ext/check-updates")
         object CheckUpdates
     }
@@ -295,9 +290,9 @@ object Routes {
             }
 
             composableWithDeepLink(Settings.Theme::class) { ThemeScreen() }
-            composableWithDeepLink(Settings.ThemeManager::class) { navBackStack ->
-                val payload = navBackStack.toRoute<Settings.ThemeManager>()
-                ThemeManagerScreen(payload.action)
+            composableWithDeepLink(Settings.ThemeSelection::class) { navBackStack ->
+                val payload = navBackStack.toRoute<Settings.ThemeSelection>()
+                ThemeSelectionScreen(payload.action)
             }
 
             composableWithDeepLink(Settings.Keyboard::class) { KeyboardScreen() }
@@ -361,11 +356,6 @@ object Routes {
                 val payload = navBackStack.toRoute<Ext.Import>()
                 val uuid = payload.uuid
                 ExtensionImportScreen(payload.type, uuid)
-            }
-            composableWithDeepLink(Ext.View::class) { navBackStack ->
-                val payload = navBackStack.toRoute<Ext.View>()
-                val extensionId = payload.id
-                ExtensionViewScreen(id = extensionId)
             }
             composableWithDeepLink(Ext.CheckUpdates::class) {
                 CheckUpdatesScreen()

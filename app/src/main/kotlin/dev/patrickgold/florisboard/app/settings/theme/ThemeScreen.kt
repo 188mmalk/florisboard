@@ -16,19 +16,16 @@
 
 package dev.patrickgold.florisboard.app.settings.theme
 
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Input
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Brightness2
 import androidx.compose.material.icons.filled.BrightnessAuto
-import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.ColorLens
 import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.Shop
 import androidx.compose.material.icons.filled.WbTwilight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItemDefaults
@@ -37,23 +34,29 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.style.TextOverflow
+import dev.patrickgold.florisboard.BuildConfig
 import dev.patrickgold.florisboard.R
 import dev.patrickgold.florisboard.app.FlorisPreferenceStore
 import dev.patrickgold.florisboard.app.LocalNavController
 import dev.patrickgold.florisboard.app.Routes
-import dev.patrickgold.florisboard.app.apptheme.ScreenHorizontalPadding
-import dev.patrickgold.florisboard.app.components.SegmentedListTitle
+import dev.patrickgold.florisboard.app.components.ScrollableScreenColumn
+import dev.patrickgold.florisboard.app.components.SegmentedListColumn
 import dev.patrickgold.florisboard.app.enumDisplayEntriesOf
+import dev.patrickgold.florisboard.app.ext.ExtensionInfoBottomSheet
+import dev.patrickgold.florisboard.ime.extension.Extension
 import dev.patrickgold.florisboard.ime.extension.ExtensionComponentName
 import dev.patrickgold.florisboard.ime.theme.LocalThemeController
 import dev.patrickgold.florisboard.ime.theme.PreferredThemeMode
-import dev.patrickgold.florisboard.ime.theme.ThemeExtension
 import dev.patrickgold.florisboard.lib.compose.FlorisScreenNg
+import dev.patrickgold.florisboard.lib.util.launchUrl
 import dev.patrickgold.jetpref.datastore.model.collectAsState
 import dev.patrickgold.jetpref.datastore.ui.ColorPickerPreference
 import dev.patrickgold.jetpref.datastore.ui.ListPreference
@@ -74,6 +77,7 @@ fun ThemeScreen() {
     val mode by prefs.theme.mode.collectAsState()
     val dayThemeId by prefs.theme.dayThemeId.collectAsState()
     val nightThemeId by prefs.theme.nightThemeId.collectAsState()
+    var focusedExtension by remember { mutableStateOf<Extension<*>?>(null) }
 
     @Composable
     fun rememberThemeName(themeId: ExtensionComponentName): String {
@@ -89,76 +93,54 @@ fun ThemeScreen() {
         title = stringRes(R.string.settings__theme__title),
         previewFieldVisible = true,
     ) { contentPadding ->
-//        context.launchUrl("https://${BuildConfig.FLADDONS_STORE_URL}/")
-//        Icons.Filled.Add,
-//        Icons.Default.Shop,
-//        Icons.AutoMirrored.Filled.Input,
-        LazyColumn(
-            modifier = Modifier.padding(horizontal = ScreenHorizontalPadding),
-            contentPadding = contentPadding,
-        ) {
-            val countOffset = if (mode == PreferredThemeMode.FOLLOW_TIME) 2 else 0
-            val staticCount = 4 + countOffset
-            item {
+        ScrollableScreenColumn(contentPadding) {
+            SegmentedListColumn {
+                val countOffset = if (mode == PreferredThemeMode.FOLLOW_TIME) 2 else 0
+                val count = 4 + countOffset
                 ListPreference(
                     prefs.theme.mode,
-                    shapes = ListItemDefaults.segmentedShapes(0, staticCount),
+                    shapes = ListItemDefaults.segmentedShapes(0, count),
                     icon = Icons.Default.BrightnessAuto,
                     title = stringRes(R.string.pref__theme__mode__label),
                     entries = enumDisplayEntriesOf(PreferredThemeMode::class),
                 )
-            }
-            if (mode == PreferredThemeMode.FOLLOW_TIME) {
-                item {
+                if (mode == PreferredThemeMode.FOLLOW_TIME) {
                     LocalTimePickerPreference(
                         prefs.theme.sunriseTime,
-                        modifier = Modifier.padding(top = ListItemDefaults.SegmentedGap),
-                        shapes = ListItemDefaults.segmentedShapes(1, staticCount),
+                        shapes = ListItemDefaults.segmentedShapes(1, count),
                         title = stringRes(R.string.pref__theme__sunrise_time__label),
                         icon = Icons.Default.WbTwilight,
                     )
-                }
-                item {
                     LocalTimePickerPreference(
                         prefs.theme.sunsetTime,
-                        modifier = Modifier.padding(top = ListItemDefaults.SegmentedGap),
-                        shapes = ListItemDefaults.segmentedShapes(2, staticCount),
+                        shapes = ListItemDefaults.segmentedShapes(2, count),
                         title = stringRes(R.string.pref__theme__sunset_time__label),
                         icon = Icons.Default.Brightness2,
                     )
                 }
-            }
-            item {
                 Preference(
-                    modifier = Modifier.padding(top = ListItemDefaults.SegmentedGap),
-                    shapes = ListItemDefaults.segmentedShapes(1 + countOffset, staticCount),
+                    shapes = ListItemDefaults.segmentedShapes(1 + countOffset, count),
                     icon = Icons.Default.LightMode,
                     title = stringRes(R.string.pref__theme__day),
                     summary = rememberThemeName(dayThemeId),
                     enabledIf = { prefs.theme.mode isNotEqualTo PreferredThemeMode.ALWAYS_NIGHT },
                     onClick = {
-                        navController.navigate(Routes.Settings.ThemeManager(ThemeManagerScreenAction.SELECT_DAY))
+                        navController.navigate(Routes.Settings.ThemeSelection(ThemeSelectionScreenAction.SELECT_DAY))
                     },
                 )
-            }
-            item {
                 Preference(
-                    modifier = Modifier.padding(top = ListItemDefaults.SegmentedGap),
-                    shapes = ListItemDefaults.segmentedShapes(2 + countOffset, staticCount),
+                    shapes = ListItemDefaults.segmentedShapes(2 + countOffset, count),
                     icon = Icons.Default.DarkMode,
                     title = stringRes(R.string.pref__theme__night),
                     summary = rememberThemeName(nightThemeId),
                     enabledIf = { prefs.theme.mode isNotEqualTo PreferredThemeMode.ALWAYS_DAY },
                     onClick = {
-                        navController.navigate(Routes.Settings.ThemeManager(ThemeManagerScreenAction.SELECT_NIGHT))
+                        navController.navigate(Routes.Settings.ThemeSelection(ThemeSelectionScreenAction.SELECT_NIGHT))
                     },
                 )
-            }
-            item {
                 ColorPickerPreference(
                     pref = prefs.theme.accentColor,
-                    modifier = Modifier.padding(top = ListItemDefaults.SegmentedGap, bottom = 16.dp),
-                    shapes = ListItemDefaults.segmentedShapes(3 + countOffset, staticCount),
+                    shapes = ListItemDefaults.segmentedShapes(3 + countOffset, count),
                     title = stringRes(R.string.pref__theme__theme_accent_color__label),
                     defaultValueLabel = stringRes(R.string.action__default),
                     icon = Icons.Default.ColorLens,
@@ -175,49 +157,54 @@ fun ThemeScreen() {
                 )
             }
 
-            val extensions = themeIndex.extensions.values.toList()
-            for (extension in extensions) {
-                segmentedExtensionItems(extension)
+            SegmentedListColumn {
+                val count = 3
+                SegmentedListItem(
+                    onClick = { context.launchUrl("https://${BuildConfig.FLADDONS_STORE_URL}/") },
+                    shapes = ListItemDefaults.segmentedShapes(0, count),
+                    verticalAlignment = Alignment.CenterVertically,
+                    leadingContent = { Icon(Icons.Default.Shop, null) },
+                    content = { Text("Need inspiration?") },
+                    supportingContent = { Text("Visit the FlorisBoard Addons Store, an official place for the community to share themes.") },
+                )
+                SegmentedListItem(
+                    onClick = { },
+                    shapes = ListItemDefaults.segmentedShapes(1, count),
+                    verticalAlignment = Alignment.CenterVertically,
+                    leadingContent = { Icon(Icons.AutoMirrored.Filled.Input, null) },
+                    content = { Text("Already have a theme downloaded?") },
+                    supportingContent = { Text("Click here to import it.") },
+                )
+                SegmentedListItem(
+                    onClick = { },
+                    shapes = ListItemDefaults.segmentedShapes(2, count),
+                    verticalAlignment = Alignment.CenterVertically,
+                    leadingContent = { Icon(Icons.Filled.Add, null) },
+                    content = { Text("Feeling creative?") },
+                    supportingContent = { Text("Create your own theme with the advanced built-in theme editor.") },
+                )
+            }
+
+            SegmentedListColumn(title = "Installed themes") {
+                val extensions = themeIndex.extensions.values.toList()
+                for ((index, extension) in extensions.withIndex()) key(extension.manifest.meta.id) {
+                    SegmentedListItem(
+                        onClick = { focusedExtension = extension },
+                        shapes = ListItemDefaults.segmentedShapes(index, extensions.size),
+                        verticalAlignment = Alignment.CenterVertically,
+                        leadingContent = { Icon(Icons.Default.Extension, null) },
+                        overlineContent = { Text(extension.manifest.meta.id) },
+                        content = { Text(extension.manifest.meta.title) },
+                        supportingContent = extension.manifest.meta.description?.let { description ->
+                            { Text(description, overflow = TextOverflow.Ellipsis, maxLines = 3) }
+                        },
+                    )
+                }
             }
         }
-    }
-}
 
-private fun LazyListScope.segmentedExtensionItems(
-    extension: ThemeExtension,
-) {
-    val components = extension.manifest.themes.sortedBy { it.name }
-    val count = components.size + 1
-    item {
-        SegmentedListTitle(extension.manifest.meta.id)
-    }
-    item {
-        SegmentedListItem(
-            shapes = ListItemDefaults.segmentedShapes(0, count),
-            content = { Text(extension.manifest.meta.title) },
-            supportingContent = extension.manifest.meta.description?.let { { Text(it) } },
-            trailingContent = { Icon(Icons.Default.ChevronRight, contentDescription = null) },
-        )
-    }
-    itemsIndexed(components) { index, component ->
-        SegmentedListItem(
-            modifier = Modifier.padding(top = ListItemDefaults.SegmentedGap),
-            shapes = ListItemDefaults.segmentedShapes(index + 1, count),
-            leadingContent = {
-                Icon(
-                    imageVector = if (component.isNightTheme) {
-                        Icons.Default.DarkMode
-                    } else {
-                        Icons.Default.LightMode
-                    },
-                    contentDescription = null,
-                )
-            },
-            content = { Text(component.name) },
-            trailingContent = { Icon(Icons.Default.ChevronRight, contentDescription = null) },
-        )
-    }
-    item {
-        Spacer(Modifier.height(16.dp))
+        focusedExtension?.let { extension ->
+            ExtensionInfoBottomSheet(extension, onDismissRequest = { focusedExtension = null })
+        }
     }
 }

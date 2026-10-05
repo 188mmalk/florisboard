@@ -23,8 +23,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import dev.patrickgold.florisboard.app.apptheme.ScreenHorizontalPadding
+import dev.patrickgold.florisboard.app.apptheme.SegmentedListColumnVerticalPadding
 import org.florisboard.lib.compose.florisVerticalScroll
 
 @Composable
@@ -37,7 +37,11 @@ fun ScrollableScreenColumn(
             .padding(contentPadding)
             .fillMaxSize()
             .florisVerticalScroll()
-            .padding(start = ScreenHorizontalPadding, end = ScreenHorizontalPadding, bottom = 8.dp),
+            .padding(
+                start = ScreenHorizontalPadding,
+                end = ScreenHorizontalPadding,
+                bottom = SegmentedListColumnVerticalPadding,
+            ),
         content = content,
     )
 }

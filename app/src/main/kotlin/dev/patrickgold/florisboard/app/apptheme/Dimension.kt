@@ -18,4 +18,6 @@ package dev.patrickgold.florisboard.app.apptheme
 
 import androidx.compose.ui.unit.dp
 
+val SegmentedListColumnVerticalPadding = 8.dp
+
 val ScreenHorizontalPadding = 16.dp

@@ -25,7 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import dev.patrickgold.florisboard.app.apptheme.SegmentedListColumnVerticalPadding
 
 @Composable
 fun SegmentedListTitle(
@@ -34,7 +34,7 @@ fun SegmentedListTitle(
 ) {
     Text(
         modifier = modifier
-            .padding(top = 8.dp),
+            .padding(top = SegmentedListColumnVerticalPadding),
         text = title,
         style = MaterialTheme.typography.titleSmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -51,7 +51,8 @@ fun SegmentedListColumn(
         SegmentedListTitle(title)
     }
     Column(
-        modifier = modifier.padding(vertical = 8.dp),
+        modifier = modifier
+            .padding(vertical = SegmentedListColumnVerticalPadding),
         verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
         content = content,
     )

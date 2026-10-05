@@ -141,7 +141,7 @@ fun ExtensionListScreen(type: ExtensionListScreenType, showUpdate: Boolean) = Fl
                     ) {
                         FlorisTextButton(
                             onClick = {
-                                navController.navigate(Routes.Ext.View(manifest.meta.id))
+                                //navController.navigate(Routes.Ext.View(manifest.meta.id))
                             },
                             icon = Icons.Outlined.Info,
                             text = stringRes(id = R.string.ext__list__view_details),//stringRes(R.string.action__add),
